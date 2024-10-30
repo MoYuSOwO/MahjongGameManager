@@ -200,6 +200,7 @@
                                     {% endfor %}
                                 {% endif %}
                                 <td>
+                                    <button onclick="openMemberPunishModal('{{ member.id }}')">'额外罚点'</button>
                                     <button onclick="openMemberEditModal('{{ member.id }}', '{{ member.name }}', '{{ member.team_id }}')">编辑</button>
                                     <form action="/delete_member/{{ member.id }}" method="post">
                                         <button type="submit">删除</button>
@@ -213,6 +214,19 @@
             {% else %}
                 <p>暂时没有参赛成员</p>
             {% endif %}
+
+            <div id="editpunishModal" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="getElementById('editpunishModal').style.display = 'none';">&times;</span>
+                    <h3>额外罚点</h3>
+                    <form id="editpunishForm" action="" method="post">
+                        <label for="punishpt">额外罚点</label>
+                        <input type="number" id="punishpt" name="punishpt" required>
+                        <button type="submit">提交</button>
+                    </form>
+                </div>
+            </div>
+
             <div id="editmemberModal" class="modal">
                 <div class="modal-content">
                     <span class="close" onclick="getElementById('editmemberModal').style.display = 'none';">&times;</span>
@@ -657,6 +671,11 @@
             document.getElementById('north_score').value = northscore;
             document.getElementById('editroundForm').action = `/edit_round/${roundId}`;
             document.getElementById('editroundModal').style.display = 'block';
+        }
+
+        function openMemberPunishModal(memberId) {
+            document.getElementById('editpunishForm').action = `/punishment/${memberId}`;
+            document.getElementById('editpunishModal').style.display = 'block';
         }
 
     </script>

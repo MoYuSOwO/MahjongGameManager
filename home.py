@@ -99,6 +99,8 @@ class Member(db.Model):
     game_id = db.Column(db.Integer, db.ForeignKey('game.id'), nullable=False)
     team_id = db.Column(db.Integer, db.ForeignKey('teams.id'), nullable=True)
 
+    point_punishment = db.Column(db.Integer, nullable=True)
+
 # 定义比赛模型
 class Game(db.Model):
     __tablename__ = 'game'
@@ -288,9 +290,9 @@ def add_member(game_id):
     member_name = request.form.get('member_name')
     if game.rules == 'M-League团体赛':
         team_id = request.form.get('member_team')
-        new_member = Member(name=member_name, game_id=game_id, team_id=team_id)
+        new_member = Member(name=member_name, game_id=game_id, team_id=team_id, point_punishment=0)
     else:
-        new_member = Member(name=member_name, game_id=game_id)
+        new_member = Member(name=member_name, game_id=game_id, point_punishment=0)
     
     db.session.add(new_member)
     db.session.commit()
@@ -321,6 +323,31 @@ def edit_member(member_id):
         db.session.commit()
 
         flash('成员信息修改成功！', 'success')
+        return redirect(url_for('manage_game', game_id=member.game_id, tab=tab))
+    else:
+        flash('未找到该成员！', 'error')
+        return redirect(url_for('manage_game'))
+    
+@app.route('/punishment/<int:member_id>', methods=['POST'])
+def punishment(member_id):
+
+    if not is_logged_in():  # 检查用户是否登录
+        flash('你未登录或会话已超时，请登录！', 'warning')
+        return redirect(url_for('login'))  # 未登录则重定向到登录页面
+    
+    tab = request.args.get('tab', 'member_management')
+    
+
+    member = Member.query.get(member_id)
+
+
+    if member:
+        punishpt = request.form.get('punishpt')
+        member.point_punishment = punishpt
+        # 提交修改到数据库
+        db.session.commit()
+
+        flash('罚点修改成功！', 'success')
         return redirect(url_for('manage_game', game_id=member.game_id, tab=tab))
     else:
         flash('未找到该成员！', 'error')
@@ -480,6 +507,12 @@ def team_ranking_table(game):
         second_place = 0
         third_place = 0
         fourth_place = 0
+        punishment = 0
+
+        members = Member.query.filter_by(team_id=team.id).all()
+
+        for _member in members:
+            punishment += _member.point_punishment
 
         for _round in rounds:
             score = [int(_round.east_score), int(_round.west_score), int(_round.south_score), int(_round.north_score)]
@@ -519,6 +552,10 @@ def team_ranking_table(game):
                 if game.rules == 'M-League团体赛':
                     total_original_point += float(playerscore - 25000) / 1000.0
                 total_original_point = round(total_original_point, 1)
+
+        total_score -= punishment
+
+        total_score = round(total_score, 1)
         
         team_data.append({
             'id': team.id,
@@ -529,7 +566,8 @@ def team_ranking_table(game):
             'first_place': first_place,
             'second_place': second_place,
             'third_place': third_place,
-            'fourth_place': fourth_place
+            'fourth_place': fourth_place,
+            'punishment': punishment
         })
 
     return sorted(team_data, key=lambda x: (x['total_games'] != 0, x['total_score']), reverse=True)
@@ -549,6 +587,7 @@ def member_ranking_table(game):
         second_place = 0
         third_place = 0
         fourth_place = 0
+        punishment = member.point_punishment
 
         for _round in rounds:
             score = [int(_round.east_score), int(_round.west_score), int(_round.south_score), int(_round.north_score)]
@@ -594,6 +633,11 @@ def member_ranking_table(game):
         if average_rank != 0:
             average_rank /= float(total_games)
             average_rank = round(average_rank, 2)
+
+        total_score -= punishment
+
+        total_score = round(total_score, 1)
+
         member_data.append({
             'team_name': Team.query.get(member.team_id).name,
             'name': member.name,
@@ -605,7 +649,8 @@ def member_ranking_table(game):
             'first_place': first_place,
             'second_place': second_place,
             'third_place': third_place,
-            'fourth_place': fourth_place
+            'fourth_place': fourth_place,
+            'punishment': punishment
         })
     return sorted(member_data, key=lambda x: (x['total_games'] != 0, x['total_score']), reverse=True)
 

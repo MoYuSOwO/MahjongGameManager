@@ -126,6 +126,7 @@
                                 <th>2位半庄数</th>
                                 <th>3位半庄数</th>
                                 <th>4位半庄数</th>
+                                <th>队伍罚点</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -139,6 +140,7 @@
                                 <td>{{ team.second_place }}</td>
                                 <td>{{ team.third_place }}</td>
                                 <td>{{ team.fourth_place }}</td>
+                                <td>{{ team.punishment }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -159,23 +161,25 @@
                             <th>2位半庄数</th>
                             <th>3位半庄数</th>
                             <th>4位半庄数</th>
+                            <th>罚点</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for member in members %}
-                        <tr>
-                            <td>{{ member.name }}</td>
-                            <td>{{ member.team_name }}</td>
-                            <td>{{ member.total_score }}</td>
-                            <td>{{ member.total_original_point }}</td>
-                            <td>{{ member.total_games }}</td>
-                            <td>{{ member.average_rank }}</td>
-                            <td>{{ member.highest_point }}</td>
-                            <td>{{ member.first_place }}</td>
-                            <td>{{ member.second_place }}</td>
-                            <td>{{ member.third_place }}</td>
-                            <td>{{ member.fourth_place }}</td>
-                        </tr>
+                            <tr>
+                                <td>{{ member.name }}</td>
+                                <td>{{ member.team_name }}</td>
+                                <td>{{ member.total_score }}</td>
+                                <td>{{ member.total_original_point }}</td>
+                                <td>{{ member.total_games }}</td>
+                                <td>{{ member.average_rank }}</td>
+                                <td>{{ member.highest_point }}</td>
+                                <td>{{ member.first_place }}</td>
+                                <td>{{ member.second_place }}</td>
+                                <td>{{ member.third_place }}</td>
+                                <td>{{ member.fourth_place }}</td>
+                                <td>{{ member.punishment }}</td>
+                            </tr>
                         {% endfor %}
                     </tbody>
                 </table>
