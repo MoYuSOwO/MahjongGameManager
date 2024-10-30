@@ -747,5 +747,33 @@ def edit_team(team_id):
     
     return redirect(url_for('manage_game', game_id=team.game_id, tab=tab))
 
+@app.route('/add_team_plan/<int:game_id>', methods=['POST'])
+def add_team_plan(game_id):
+
+    if not is_logged_in():  # 检查用户是否登录
+        flash('你未登录或会话已超时，请登录！', 'warning')
+        return redirect(url_for('login'))  # 未登录则重定向到登录页面
+    
+    tab = request.args.get('tab', 'schedule_input')
+
+    east_team_id = request.form.get('east_team_id')
+    south_team_id = request.form.get('south_team_id')
+    west_team_id = request.form.get('west_team_id')
+    north_team_id = request.form.get('north_team_id')
+
+    team_ids = [east_team_id, south_team_id, west_team_id, north_team_id]
+
+    if len(team_ids) != len(set(team_ids)):
+        flash('选手不能重复，请重新选择！', 'error')
+        return redirect(url_for('manage_game', game_id=game_id, tab=tab))
+
+    new_plan = Plan(east_team_id=east_team_id, south_team_id=south_team_id, west_team_id=west_team_id, north_team_id=north_team_id)
+    
+    db.session.add(new_plan)
+    flash('半庄计划添加成功！', 'success')
+    db.session.commit()
+    
+    return redirect(url_for('manage_game', game_id=game_id, tab=tab))
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80)  # 运行服务器
