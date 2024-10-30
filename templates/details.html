@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ game.name }} - 比赛详情</title>
+    <style>
+        /* 通用样式 */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .container {
+            width: 90%;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        /* 导航栏样式 */
+        nav {
+            background-color: #007BFF;
+            padding: 10px 0;
+        }
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .nav-tabs li {
+            margin: 0 20px;
+        }
+        .nav-tabs a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.2em;
+            padding: 10px;
+            transition: background-color 0.3s ease;
+        }
+        .nav-tabs a:hover {
+            background-color: #0056b3;
+            border-radius: 5px;
+        }
+        .nav-tabs .active {
+            background-color: #0056b3;
+            border-radius: 5px;
+        }
+
+        /* 选项卡内容样式 */
+        .tab-content {
+            background-color: white;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .custom-list li {
+            background-color: #ffffff;
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            font-size: 1.1em;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 600px) {
+            .nav-tabs {
+                flex-direction: column;
+                align-items: center;
+            }
+            .nav-tabs li {
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>{{ game.name }} - 比赛详情</h1>
+
+        <!-- 导航栏 -->
+        <nav>
+            <ul class="nav-tabs">
+                <li><a href="?tab=home" class="{% if tab == 'description' %}active{% endif %}">赛事说明</a></li>
+                <li><a href="?tab=ranking" class="{% if tab == 'ranking' %}active{% endif %}">赛事排行</a></li>
+                <li><a href="?tab=schedule" class="{% if tab == 'schedule' %}active{% endif %}">赛事赛程</a></li>
+                <li><a href="/">返回主页</a></li>
+            </ul>
+        </nav>
+
+        <!-- 选项卡内容 -->
+        <div class="tab-content">
+            {% if tab == 'ranking' %}
+                <h2>赛事排行</h2>
+                {% if game.rules == 'M-League团体赛' %}
+                    <h3>队伍排行</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>队伍名称</th>
+                                <th>总积分</th>
+                                <th>素点</th>
+                                <th>已打半庄数</th>
+                                <th>1位半庄数</th>
+                                <th>2位半庄数</th>
+                                <th>3位半庄数</th>
+                                <th>4位半庄数</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for team in teams %}
+                            <tr>
+                                <td>{{ team.name }}</td>
+                                <td>{{ team.total_score }}</td>
+                                <td>{{ team.total_original_point }}</td>
+                                <td>{{ team.total_games }}</td>
+                                <td>{{ team.first_place }}</td>
+                                <td>{{ team.second_place }}</td>
+                                <td>{{ team.third_place }}</td>
+                                <td>{{ team.fourth_place }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+                <h3>参赛选手排行</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>选手</th>
+                            <th>所属队伍</th>
+                            <th>总积分</th>
+                            <th>素点</th>
+                            <th>已打半庄数</th>
+                            <th>平均顺位</th>
+                            <th>最高得点</th>
+                            <th>1位半庄数</th>
+                            <th>2位半庄数</th>
+                            <th>3位半庄数</th>
+                            <th>4位半庄数</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for member in members %}
+                        <tr>
+                            <td>{{ member.name }}</td>
+                            <td>{{ member.team_name }}</td>
+                            <td>{{ member.total_score }}</td>
+                            <td>{{ member.total_original_point }}</td>
+                            <td>{{ member.total_games }}</td>
+                            <td>{{ member.average_rank }}</td>
+                            <td>{{ member.highest_point }}</td>
+                            <td>{{ member.first_place }}</td>
+                            <td>{{ member.second_place }}</td>
+                            <td>{{ member.third_place }}</td>
+                            <td>{{ member.fourth_place }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% elif tab == 'schedule' %}
+                <h2>赛事赛程</h2>
+                <p>这里是{{ game.name }}的赛事赛程安排，展示未来对局顺序</p>
+                <table border="1">
+                    <thead>
+                        <tr>
+                            {% for header in data[0] %}
+                                <th>{{ header }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in data[1:] %}
+                            <tr>
+                                {% for cell in row %}
+                                    <td>{{ cell }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <iframe src="{{ url_for('send_pdf', game_id=game.id) }}" width="100%" height="600px"></iframe>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

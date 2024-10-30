@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ game.name }} - 比赛详情</title>
+    <style>
+        /* 通用样式 */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .container {
+            width: 90%;
+            margin: 0 auto;
+        }
+
+        h1, h2, h3 {
+            color: #000000;
+        }
+
+        h1 {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        /* 导航栏样式 */
+        nav {
+            background-color: #007BFF;
+            padding: 10px 0;
+        }
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .nav-tabs li {
+            margin: 0 20px;
+        }
+        .nav-tabs a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.2em;
+            padding: 10px;
+            transition: background-color 0.3s ease;
+        }
+        .nav-tabs a:hover {
+            background-color: #0056b3;
+            border-radius: 5px;
+        }
+        .nav-tabs .active {
+            background-color: #0056b3;
+            border-radius: 5px;
+        }
+
+        /* 选项卡内容样式 */
+        .tab-content {
+            background-color: white;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+
+        section {
+            margin-bottom: 40px;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        ul {
+            padding-left: 20px;
+            list-style-type: disc;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        .custom-list li {
+            background-color: #ffffff;
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            font-size: 1.1em;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 600px) {
+            .nav-tabs {
+                flex-direction: column;
+                align-items: center;
+            }
+            .nav-tabs li {
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>{{ game.name }} - 比赛详情</h1>
+
+        <!-- 导航栏 -->
+        <nav>
+            <ul class="nav-tabs">
+                <li><a href="?tab=home" class="{% if tab == 'description' %}active{% endif %}">首页</a></li>
+                <li><a href="?tab=rules" class="{% if tab == 'description' %}active{% endif %}">赛事说明</a></li>
+                <li><a href="?tab=ranking" class="{% if tab == 'ranking' %}active{% endif %}">赛事排行</a></li>
+                <li><a href="?tab=schedule" class="{% if tab == 'schedule' %}active{% endif %}">赛事赛程</a></li>
+                <li><a href="/">返回主页</a></li>
+            </ul>
+        </nav>
+
+        <!-- 选项卡内容 -->
+        <div class="tab-content">
+            {% if tab == 'ranking' %}
+                <h2>赛事排行</h2>
+                {% if game.rules == 'M-League团体赛' %}
+                    <h3>队伍排行</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>队伍名称</th>
+                                <th>总积分</th>
+                                <th>素点</th>
+                                <th>已打半庄数</th>
+                                <th>1位半庄数</th>
+                                <th>2位半庄数</th>
+                                <th>3位半庄数</th>
+                                <th>4位半庄数</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for team in teams %}
+                            <tr>
+                                <td>{{ team.name }}</td>
+                                <td>{{ team.total_score }}</td>
+                                <td>{{ team.total_original_point }}</td>
+                                <td>{{ team.total_games }}</td>
+                                <td>{{ team.first_place }}</td>
+                                <td>{{ team.second_place }}</td>
+                                <td>{{ team.third_place }}</td>
+                                <td>{{ team.fourth_place }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+                <h3>参赛选手排行</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>选手</th>
+                            <th>所属队伍</th>
+                            <th>总积分</th>
+                            <th>素点</th>
+                            <th>已打半庄数</th>
+                            <th>平均顺位</th>
+                            <th>最高得点</th>
+                            <th>1位半庄数</th>
+                            <th>2位半庄数</th>
+                            <th>3位半庄数</th>
+                            <th>4位半庄数</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for member in members %}
+                        <tr>
+                            <td>{{ member.name }}</td>
+                            <td>{{ member.team_name }}</td>
+                            <td>{{ member.total_score }}</td>
+                            <td>{{ member.total_original_point }}</td>
+                            <td>{{ member.total_games }}</td>
+                            <td>{{ member.average_rank }}</td>
+                            <td>{{ member.highest_point }}</td>
+                            <td>{{ member.first_place }}</td>
+                            <td>{{ member.second_place }}</td>
+                            <td>{{ member.third_place }}</td>
+                            <td>{{ member.fourth_place }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% elif tab == 'schedule' %}
+                <h2>赛事赛程</h2>
+                <p>这里是{{ game.name }}的赛事赛程安排，展示未来对局顺序</p>
+                <table border="1">
+                    <thead>
+                        <tr>
+                            {% for header in data[0] %}
+                                <th>{{ header }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in data[1:] %}
+                            <tr>
+                                {% for cell in row %}
+                                    <td>{{ cell }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% elif tab == 'rules' %}
+                <section>
+                    <h2>比赛介绍</h2>
+                    <p>CUHKSZ立直麻将四麻团体赛（League of Long，下称本赛事）为CUHKSZ立直麻将非官方比赛，由LGU日麻部组织，旨在通过丰富校园文化生活，增强同学们的团队合作意识与竞技精神。赛事为参与者提供一个展示麻将技艺的平台，同时促进同学之间的交流与友谊。通过比赛，培养学生的思维能力、策略规划和心理素质，进一步推动麻将这一文化在校园中的传播与发展。希望通过此次活动，让同学们在轻松愉快的氛围中体验竞技的乐趣，增进对麻将文化的理解与热爱。</p>
+                </section>
+                
+                <section>
+                    <h2>比赛规则</h2>
+                    <h3>（一）基本规则</h3>
+                    <ul>
+                        <li>比赛为四人立直麻将，以一个半庄为单位进行。</li>
+                        <li>比赛用牌为包括3张赤宝牌在内的136张牌，不包含花牌。</li>
+                        <li>每一个半庄的比赛开始前参赛选手方位已经被确定好，不需要自己决定。</li>
+                        <li>比赛为手搓麻将比赛，所有对局者应在比赛开始前在面前码好17幢牌。</li>
+                        <li>比赛用一次掷骰确定摸牌位置。</li>
+                    </ul>
+                
+                    <h3>（二）牌相关</h3>
+                    <ul>
+                        <li>王牌前最后一张牌称海底牌，摸海底牌者不得开暗杠。</li>
+                        <li>摸海底牌或摸海底前一张牌后开杠者，若自己未和牌，则必须打一张牌，该牌称河底牌。其余玩家不得吃、碰、杠这张河底牌。</li>
+                    </ul>
+                
+                    <h3>（三）杠相关</h3>
+                    <ul>
+                        <li>玩家开杠所产生新的杠宝牌应在玩家杠之后打牌之前立即翻出。</li>
+                        <li>一局中总计最多开4次杠。</li>
+                        <li>在任何情况下，暗杠的抢杠都不成立。</li>
+                    </ul>
+                
+                    <h3>（四）比赛进行相关</h3>
+                    <ul>
+                        <li>即使有玩家在半庄途中失去所有点棒（被击飞），竞技仍继续进行到最终局为止，玩家应借入点棒继续游戏。</li>
+                        <li>任何情况下皆不允许途中流局。</li>
+                        <li>禁止食替。</li>
+                    </ul>
+                
+                    <h3>（五）听牌与立直相关</h3>
+                    <ul>
+                        <li>亲家和牌或听牌时连庄，除此之外全部轮庄，无听牌、和牌终局。</li>
+                        <li>听牌者可自行决定是否进行听牌宣言，裸单骑亦可宣告未听。</li>
+                        <li>若自己听牌的待牌已经全部用于自己的手牌及副露牌中，则不承认为听牌，也不允许立直。</li>
+                        <li>立直后的暗杠只要不改变手牌的面子构成皆可进行，无关手役的增减。</li>
+                        <li>允许振听立直和剩余摸牌次数为0的立直。</li>
+                        <li>立直后允许见逃和牌，但之后视为振听。</li>
+                    </ul>
+                
+                    <h3>（六）和牌相关</h3>
+                    <ul>
+                        <li>一局仅允许1人和牌，某一张牌打出后，有多家进行和牌宣言时，按照放铳者的下家、对家、上家之顺序优先和牌，即头跳。</li>
+                        <li>和牌者在自摸时应进行“自摸”之发声，荣和时应进行“和”之发声，并展示手牌。</li>
+                        <li>自摸和牌时，首先应展示摸到的牌。</li>
+                    </ul>
+                
+                    <h3>（七）点数计算相关</h3>
+                    <ul>
+                        <li>竞技开始时，每家持有25000点，此为原点，对局者有义务在竞技开始前确认自己的持点准确无误。</li>
+                        <li>持点超过30000点以上的部分计为正分，不足的部分计为负分。</li>
+                        <li>顺位点指以半庄为单位，根据竞技顺位进行的分数加减。在本规则中，以以下方式表示：1位+50000点、2位+10000点、3位-10,000点、4位-30,000点，持点与顺位点一同以1000持点=1顺位点的比率进行换算，并统计为最终成绩。</li>
+                        <li>半庄以流局结束时，场上的立直棒归TOP所有。</li>
+                        <li>半庄结束时若有多名玩家同点，则顺位点平分。3人同点时，若顺位点无法整除，则离起家最近的1人取较大余数。若有同点TOP，则流局结束时的立直棒由同点TOP均分。同点TOP有3人时，1根立直棒分为400、300、300，由离起家最近的1人取400。当立直棒点数无法整除时，由此比例等倍计算。</li>
+                        <li>连风牌对子计2符。</li>
+                        <li>30符4番，60符3番计切上满贯。</li>
+                        <li>除平和自摸外，所有自摸加计自摸2符。</li>
+                        <li>平和形副露荣和时，底符计为30符。</li>
+                        <li>无双倍役满，有复合役满，无累计役满。</li>
+                    </ul>
+                
+                    <h3>（八）包牌相关</h3>
+                    <ul>
+                        <li>打出确定一家大三元、四杠子、大四喜的选手适用包牌规则，若和牌者为自摸和，则包牌者支付全部点数；若和牌者为荣和，则包牌者与放铳者各支付一半点数。</li>
+                        <li>包牌规则中，本场棒亦由包牌者承担。</li>
+                        <li>若和牌者的手牌复合多个役满，则包牌者只支付自己应承担的役满点数与本场棒，其余点数由他家正常支付。</li>
+                    </ul>
+                
+                    <h3>（九）竞技行为相关</h3>
+                    <ul>
+                        <li>摸打动作必须由单手进行，打牌之前不可将摸到的牌插入手牌中。</li>
+                        <li>若有玩家作出应处chombo处罚的行为（参照后文），则该局作废重来。</li>
+                        <li>本场数由亲家一百点棒置于风盘上来表示，n本场则放置n根一百点棒，这些点棒无论如何该局结束后由该局亲家收回。</li>
+                        <li>摸牌不得过快，不得妨碍其他人正常发声行为。</li>
+                        <li>发声行为不得明显过迟，过慢视为无效发声，比赛继续进行。</li>
+                        <li>若荣和、碰、杠、吃同时发生，则按荣和大于碰杠大于吃的优先顺序进行处理，发声明显迟的则视为无效发声。</li>
+                        <li>立直宣言未进行“立直”之发声、未放置立直棒或未将打出牌横置，且最终未纠正的，立直视为无效。</li>
+                        <li>流局不听牌不得亮出手牌。</li>
+                    </ul>
+                
+                    <h3>（十）处罚相关</h3>
+                    <ol>
+                        <li>处罚有chombo、放弃和牌、黄牌警告三种。</li>
+                        <li>触犯规则但又未及放弃和牌或chombo处罚范围的，由裁判出示黄牌警告，以下行为给予黄牌警告，一个半庄内三次黄牌警告下一小局作一次停和处理：<br>
+                            <ul>
+                                <li>在比赛开始时间15min之内的迟到。</li>
+                                <li>过度强打和长考。</li>
+                                <li>多次小手返或长时间将摸到的牌捏在手中，或其他不明显区分手摸切的行为</li>
+                                <li>摸牌动作过快。</li>
+                                <li>流局不听牌亮出手牌。</li>
+                            </ul>
+                        </li>
+                        <li>放弃和牌者在该局失去吃、碰、杠、立直的资格，并正常陪打至该局结束。违反此条者给予chombo处罚，以下行为给予放弃和牌处罚：<br>
+                            <ul>
+                                <li>大相公与小相公。</li>
+                                <li>上家打牌之前即摸牌。</li>
+                                <li>食替。</li>
+                                <li>仅发声不做实际动作的空吃、空碰、空杠、空自摸、空和。</li>
+                                <li>错吃、错碰、错杠。</li>
+                            </ul>
+                        </li>
+                        <li>所有接受chombo处罚者，应从自己的过往总计pt中扣除20pt，且该局重打。以下行为给予chombo处罚：<br>
+                            <ul>
+                                <li>超过比赛开始时间15min之后的迟到。</li>
+                                <li>展示手牌的错和、错自摸。</li>
+                                <li>任何时候的未听牌的立直。</li>
+                                <li>立直后进行违规暗杠。</li>
+                                <li>破坏牌山，影响宝牌、里宝牌的判断的，或严重影响比赛进行的。</li>
+                                <li>故意暴露手牌或暴露大部分手牌的。</li>
+                            </ul>
+                        </li>
+                    </ol>
+
+                    <h3>（十一）补充规定</h3>
+                    <ul>
+                        <li>半庄过程中除非为了算点或有特别紧急事项，不得使用电子设备。</li>
+                        <li>半庄过程中除非是必要的提醒与发声外，不得闲聊。</li>
+                        <li>不得过度长考、多次连续早巡长考。</li>
+                        <li>比赛日当日的16:00前必须确定各队伍的出战名单，超过该时间原则上不得更改出战队员。</li>
+                        <li>流局推牌表示听牌，盖牌表示未听，可以不发声。</li>
+                        <li>流局推牌或盖牌的过程从东家开始，然后南家、西家、北家依次盖牌。</li>
+                        <li>半庄摸牌时，牌未摸完、宝牌指示牌未翻出时，不得看自己摸到的牌</li>
+                        <li>半庄过程中，对于任何一个选手，任何时候都有回答其他选手关于点棒疑问的义务</li>
+                    </ul>
+
+                    <h3>（十二）本规则未提到的，请参阅M-League官方规则，若仍未提到，最终解释权规赛事组委会所有</h3>
+                </section>
+                
+                <section>
+                    <h2>比赛赛制</h2>
+                    <h3>1. 常规赛</h3>
+                    <ul>
+                        <li>常规赛将于规定日期之间每周的周四、周五、周六、周日举行。</li>
+                        <li>常规赛赛程由编排决定，确保每个参赛队伍完成36个半庄，队伍中每个选手最少出场不能少于5个半庄，最多不能多于18个半庄。</li>
+                        <li>参赛选手不得无故缺席。</li>
+                    </ul>
+                
+                    <h3>2. 总决赛（待确定）</h3>
+                    <ul>
+                        <li>常规赛队伍的前四名分数减半，进入总决赛。</li>
+                        <li>总决赛一共进行12个半庄，决出冠亚季军。</li>
+                    </ul>
+                </section>
+                
+                <section>
+                    <h2>比赛奖励（待确定）</h2>
+                    <ul>
+                        <li>第一名、第二名、第三名队伍每名队员获得价值为50、30、20元的奖品。</li>
+                        <li>常规赛MVP、总决赛MVP获得价值为30元的奖品。</li>
+                        <li>和出役满的选手每个役满可获得价值为15元的奖品。</li>
+                    </ul>
+                </section>
+                
+                <section>
+                    <h2>注意事项</h2>
+                    <ul>
+                        <li>赛事主办方禁止任何赌博行为。</li>
+                        <li>本比赛最终解释权归主办方（LGU日麻部）所有。</li>
+                    </ul>
+                </section>
+            {% else %}
+                <!-- 下一场比赛部分 -->
+                <section id="upcoming-match">
+                    <h2>下一场比赛</h2>
+                    <div class="match">
+                        <img src="team1-logo.png" alt="Team 1">
+                        <p>vs</p>
+                        <img src="team2-logo.png" alt="Team 2">
+                    </div>
+                    <p>比赛日期：2024年10月21日</p>
+                </section>
+
+                <!-- 速报部分 -->
+                <section id="news">
+                    <h2>新闻速报</h2>
+                    <ul class="custom-list">
+                        <li>剪影又双叒叕吃一啦！</li>
+                        <li>剪影又双叒吃一啦！</li>
+                        <li>剪影又双吃一啦！</li>
+                        <li>剪影又吃一啦！</li>
+                        <li>剪影吃一啦！</li>
+                    </ul>
+                </section>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

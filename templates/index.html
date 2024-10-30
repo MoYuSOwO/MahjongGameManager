@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CUHKSZ日麻比赛概览</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-bottom: 0;
+            color: #333;
+        }
+
+        h2 {
+            font-size: 14px;
+            margin-top: 5px;
+            color: #666;
+        }
+
+        .container {
+            text-align: center;
+            width: 100%;
+        }
+
+        .buttons {
+            margin-top: 20px;
+        }
+
+        .buttons a {
+            text-decoration: none;
+            padding: 10px 20px;
+            margin: 0 10px;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .buttons a:hover {
+            background-color: #45a049;
+        }
+
+        .game-list {
+            margin-top: 30px;
+            width: 80%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .game-list ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .game-list ul li {
+            background-color: #fff;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .game-list ul li a {
+            text-decoration: none;
+            color: #333;
+            font-size: 18px;
+        }
+
+        .game-list ul li:hover {
+            transform: scale(1.02);
+        }
+    </style>
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CUHKSZ日麻比赛概览</h1>
+        <h2>powered by 魔芋OwO</h2>
+        <div class="buttons">
+            <a href="/login">管理登录</a>
+        </div>
+
+        <!-- 动态生成的比赛列表 -->
+        <div class="game-list">
+            <h3>比赛列表</h3>
+            <ul>
+                {% if games %}
+                    {% for game in games %}
+                        <li><a href="/game_details/{{ game.id }}">{{ game.name }}</a></li>
+                    {% endfor %}
+                {% else %}
+                    <li>暂时无比赛</li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

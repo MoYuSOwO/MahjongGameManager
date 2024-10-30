@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ game.name }} 管理</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* 样式设置 */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+        .sidebar {
+            width: 200px; /* 侧边栏宽度 */
+            background-color: #333; /* 侧边栏背景颜色 */
+            color: white; /* 字体颜色 */
+            height: 100vh; /* 侧边栏高度 */
+            padding: 20px;
+        }
+        .sidebar h2 {
+            font-size: 24px; /* 标题字体大小 */
+            margin-bottom: 20px; /* 下边距 */
+        }
+        .sidebar a {
+            color: white; /* 链接颜色 */
+            text-decoration: none; /* 去掉下划线 */
+            display: block; /* 块级显示 */
+            margin: 10px 0; /* 上下边距 */
+        }
+        .sidebar a:hover {
+            background-color: #555; /* 悬停背景色 */
+        }
+        .content {
+            padding: 20px; /* 主要内容内边距 */
+            flex: 1; /* 占据剩余空间 */
+            background-color: #f4f4f4; /* 内容区域背景颜色 */
+        }
+        h3 {
+            margin-bottom: 15px; /* 标题下边距 */
+            font-size: 28px; /* 加大字号 */
+        }
+
+        #game-info {
+            margin-bottom: 20px;
+        }
+
+        /* 对话框样式 */
+        .modal {
+            display: none; /* 默认隐藏 */
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 300px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px; /* 表单元素之间的间隔 */
+        }
+
+        input[type="text"], input[type="date"], select {
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse; /* 合并表格的边框，消除双线 */
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd; /* 添加单元格的边框 */
+            padding: 8px; /* 调整单元格的内边距 */
+            text-align: center; /* 让文本居中 */
+        }
+
+        th {
+            background-color: #f2f2f2; /* 设置表头背景颜色 */
+            font-weight: bold;
+        }
+
+        /* 鼠标悬停时高亮显示 */
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        /* 设置表格间距和文字大小 */
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9; /* 交替的行颜色 */
+        }
+
+        table tbody td {
+            font-size: 14px;
+        }
+
+    </style>
+    <script>
+
+        // 点击按钮打开对话框
+        function Open(Modal){
+            Modal.style.display = "block";
+        }
+
+
+        // 点击关闭按钮关闭对话框
+        function close(Modal) {
+            Modal.style.display = "none";
+        }
+
+        
+    </script>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>{{ game.name }}</h2> <!-- 侧边栏标题为比赛名称 -->
+        <a href="?tab=home">比赛信息</a>
+        <a href="?tab=member_management">成员管理</a>
+        {% if game.rules == 'M-League团体赛'%}
+            <a href="?tab=team_management">比赛队管理</a>
+        {% endif %}
+        <a href="?tab=result_input">结果录入</a>
+        <a href="?tab=schedule_input">赛程录入</a>
+        <a href="/admin">返回上级管理页</a>
+    </div>
+    <div class="content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        {% if tab == 'member_management' %}
+            <h3>参赛成员</h3>
+            {% if members|length > 0 %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>成员姓名</th>
+                            <th>所属比赛队</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="members-table-body">
+                        {% for member in members %}
+                            <tr>
+                                <td>{{ member.id }}</td>
+                                <td>{{ member.name }}</td>
+                                {% if game.rules == 'M-League团体赛' %}
+                                    {% for team in teams %}
+                                        {% if team.id == member.team_id %}
+                                            <td>{{ team.name }}</td>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                                <td>
+                                    <button onclick="openMemberEditModal('{{ member.id }}', '{{ member.name }}', '{{ member.team_id }}')">编辑</button>
+                                    <form action="/delete_member/{{ member.id }}" method="post">
+                                        <button type="submit">删除</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            
+            {% else %}
+                <p>暂时没有参赛成员</p>
+            {% endif %}
+            <div id="editmemberModal" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="getElementById('editmemberModal').style.display = 'none';">&times;</span>
+                    <h3>编辑成员</h3>
+                    <form id="editmemberForm" action="" method="post">
+                        <label for="member_name">昵称or姓名:</label>
+                        <input type="text" id="member_name" name="member_name" required>
+                        {% if game.rules == 'M-League团体赛' %}
+                            <label for="member_team">队伍:</label>
+                            <select id="member_team" name="member_team" required>
+                                {% for team in teams %}
+                                    <option value="{{ team.id }}">{{ team.name }}</option>
+                                {% endfor %}
+                            </select>
+                        {% endif %}
+                        <button type="submit">提交</button>
+                    </form>
+                </div>
+            </div>
+
+            <button id="add-member-btn" onclick="getElementById('addmemberModal').style.display = 'block';">添加成员</button>
+
+            <div id="addmemberModal" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="getElementById('addmemberModal').style.display = 'none';">&times;</span>
+                    <h3>添加成员</h3>
+                    <form action="/add_member/{{ game.id }}" method="post">
+                        <label for="member_name">昵称or姓名:</label>
+                        <input type="text" name="member_name" required>
+                        {% if game.rules == 'M-League团体赛' %}
+                            <label for="member_team">队伍:</label>
+                            <select id="member_team" name="member_team" required>
+                                {% for team in teams %}
+                                    <option value="{{ team.id }}">{{ team.name }}</option>
+                                {% endfor %}
+                            </select>
+                        {% endif %}
+                        <button type="submit">提交</button>
+                    </form>
+                </div>
+            </div>
+        {% elif tab == 'team_management' and game.rules == 'M-League团体赛' %}
+            <h3>参赛队伍</h3>
+            {% if teams %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>队伍名称</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teams-table-body">
+                        {% for team in teams %}
+                            <tr>
+                                <td>{{ team.id }}</td>
+                                <td>{{ team.name }}</td>
+                                <td>
+                                    <button onclick="openEditModal('{{ team.id }}', '{{ team.name }}')">编辑</button>
+                                    <form action="/delete_team/{{ team.id }}" method="post">
+                                        <button type="submit">删除</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            
+            {% else %}
+                <p>暂时没有参赛队伍</p>
+            {% endif %}
+
+            <div id="editteamModal" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="getElementById('editteamModal').style.display = 'none';">&times;</span>
+                    <h3>编辑比赛队</h3>
+                    <form id="editteamForm" action="" method="post">
+                        <label for="team_name">队伍名称:</label>
+                        <input type="text" id="team_name" name="team_name" required>
+                        <button type="submit">提交</button>
+                    </form>
+                </div>
+            </div>
+
+            
+
+            <button id="add-team-btn" onclick="getElementById('addteamModal').style.display = 'block';">添加成员</button>
+
+            <div id="addteamModal" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="getElementById('addteamModal').style.display = 'none';">&times;</span>
+                    <h3>添加比赛队</h3>
+                    <form action="/add_team/{{ game.id }}" method="post">
+                        <label for="team_name">队伍名称:</label>
+                        <input type="text" name="team_name" required>
+                        <button type="submit">提交</button>
+                    </form>
+                </div>
+            </div>
+    
+        {% elif tab == 'result_input' %}        
+            <h3>半庄结果</h3>
+            {% if rounds|length > 0 %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>开始时间</th>
+                            <th>东家选手</th>
+                            <th>东家持点</th>
+                            <th>南家选手</th>
+                            <th>南家持点</th>
+                            <th>西家选手</th>
+                            <th>西家持点</th>
+                            <th>北家选手</th>
+                            <th>北家持点</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="round-record">
+                        {% for round in rounds %}
+                            <tr>
+                                <td>{{ round.id }}</td>
+                                <td>{{ round.timestamp }}</td>
+                                <td>{{ round.east_player.name }}</td>
+                                <td>{{ round.east_score }}</td>
+                                <td>{{ round.south_player.name }}</td>
+                                <td>{{ round.south_score }}</td>
+                                <td>{{ round.west_player.name }}</td>
+                                <td>{{ round.west_score }}</td>
+                                <td>{{ round.north_player.name }}</td>
+                                <td>{{ round.north_score }}</td>
+                                
+                                <td>
+                                    <button onclick="openRoundEditModal('{{ round.id }}', '{{ round.east_player.id }}', '{{ round.south_player.id }}', '{{ round.west_player.id }}', '{{ round.north_player.id }}', '{{ round.east_score }}', '{{ round.south_score }}', '{{ round.west_score }}', '{{ round.north_score }}')">编辑</button>
+                                    <form action="/delete_round/{{ round.id }}" method="post">
+                                        <button type="submit">删除</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
+            {% else %}
+                <p>暂时没有比赛数据</p>
+            {% endif %}
+
+            <div id="editroundModal" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="getElementById('editroundModal').style.display = 'none';">&times;</span>
+                    <h3>编辑半庄信息</h3>
+                    <form id="editroundForm" action="" method="post">
+                        <label for="east_player_id">东家选手:</label>
+                        <select id="east_player_id" name="east_player_id" required>
+                            {% for member in members %}
+                                <option value="{{ member.id }}">{{ member.name }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <label for="south_player_id">南家选手:</label>
+                        <select id="south_player_id" name="south_player_id" required>
+                            {% for member in members %}
+                                <option value="{{ member.id }}">{{ member.name }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <label for="west_player_id">西家选手:</label>
+                        <select id="west_player_id" name="west_player_id" required>
+                            {% for member in members %}
+                                <option value="{{ member.id }}">{{ member.name }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <label for="north_player_id">北家选手:</label>
+                        <select id="north_player_id" name="north_player_id" required>
+                            {% for member in members %}
+                                <option value="{{ member.id }}">{{ member.name }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <label for="east_score">东家持点:</label>
+                        <input type="number" id="east_score" name="east_score" required>
+
+                        <label for="south_score">南家持点:</label>
+                        <input type="number" id="south_score" name="south_score" required>
+
+                        <label for="west_score">西家持点:</label>
+                        <input type="number" id="west_score" name="west_score" required>
+
+                        <label for="north_score">北家持点:</label>
+                        <input type="number" id="north_score" name="north_score" required>
+
+                        <button type="submit">提交对局信息</button>
+                    </form>
+                </div>
+            </div>
+
+            <button id="add-round-btn" onclick="getElementById('addroundModal').style.display = 'block';">添加半庄</button>
+
+            <div id="addroundModal" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="getElementById('addroundModal').style.display = 'none';">&times;</span>
+                    <h3>添加半庄</h3>
+                    <form action="/add_round/{{ game.id }}" method="post">
+                        <label for="east_player_id">东家选手:</label>
+                        <select id="east_player_id" name="east_player_id" required>
+                            {% for member in members %}
+                                <option value="{{ member.id }}">{{ member.name }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <label for="south_player_id">南家选手:</label>
+                        <select id="south_player_id" name="south_player_id" required>
+                            {% for member in members %}
+                                <option value="{{ member.id }}">{{ member.name }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <label for="west_player_id">西家选手:</label>
+                        <select id="west_player_id" name="west_player_id" required>
+                            {% for member in members %}
+                                <option value="{{ member.id }}">{{ member.name }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <label for="north_player_id">北家选手:</label>
+                        <select id="north_player_id" name="north_player_id" required>
+                            {% for member in members %}
+                                <option value="{{ member.id }}">{{ member.name }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <label for="east_score">东家持点:</label>
+                        <input type="number" id="east_score" name="east_score" required>
+
+                        <label for="south_score">南家持点:</label>
+                        <input type="number" id="south_score" name="south_score" required>
+
+                        <label for="west_score">西家持点:</label>
+                        <input type="number" id="west_score" name="west_score" required>
+
+                        <label for="north_score">北家持点:</label>
+                        <input type="number" id="north_score" name="north_score" required>
+
+                        <button type="submit">提交对局信息</button>
+                    </form>
+                </div>
+            </div>
+
+        {% elif tab == 'schedule_input' %} 
+            <h3>赛程录入</h3>
+            {% if schedules|length > 0 %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>计划时间</th>
+                            <th>东家队伍</th>
+                            <th>东家选手</th>
+                            <th>南家队伍</th>
+                            <th>南家选手</th>
+                            <th>西家队伍</th>
+                            <th>西家选手</th>
+                            <th>北家队伍</th>
+                            <th>北家选手</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="schedule-record">
+                        {% for schedule in schedules %}
+                            <tr>
+                                <td>{{ schedule.timestamp }}</td>
+                                <td>{{ schedule.east_player.name }}</td>
+                                <td>{{ schedule.east_team.name }}</td>
+                                <td>{{ schedule.south_player.name }}</td>
+                                <td>{{ schedule.south_team.name }}</td>
+                                <td>{{ schedule.west_player.name }}</td>
+                                <td>{{ schedule.west_team.name }}</td>
+                                <td>{{ schedule.north_player.name }}</td>
+                                <td>{{ schedule.north_team.name }}</td>
+                                
+                                <td>
+                                    {% if game.rules == 'M-League团体赛' %}
+                                        <button onclick="">编辑队伍</button>
+                                        <button onclick="">录入队员</button>
+                                    {% else %}
+                                        <button onclick="">编辑</button>
+                                    {% endif %}
+
+                                    <button onclick="">录入半庄结果</button>
+                                    <form action="/delete_schedule/{{ schedule.id }}" method="post">
+                                        <button type="submit">删除</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
+            {% else %}
+                <p>暂时没录入赛程数据</p>
+            {% endif %}
+                {% if game.rules == 'M-League团体赛' %}
+                    <button id="add-teamplan-btn" onclick="getElementById('addteamplanModal').style.display = 'block';">添加计划半庄</button>
+
+                    <div id="addteamplanModal" class="modal">
+                        <div class="modal-content">
+                            <span class="close" onclick="getElementById('addteamplanModal').style.display = 'none';">&times;</span>
+                            <h3>添加计划半庄</h3>
+                            <form action="/add_team_plan/{{ game.id }}" method="post">
+                                <label for="east_team_id">东家队伍:</label>
+                                <select id="east_team_id" name="east_team_id">
+                                    {% for team in teams %}
+                                        <option value="{{ team.id }}">{{ team.name }}</option>
+                                    {% endfor %}
+                                </select>
+
+                                <label for="south_team_id">南家队伍:</label>
+                                <select id="south_team_id" name="south_team_id">
+                                    {% for team in teams %}
+                                        <option value="{{ team.id }}">{{ team.name }}</option>
+                                    {% endfor %}
+                                </select>
+
+                                <label for="west_team_id">西家队伍:</label>
+                                <select id="west_team_id" name="west_team_id">
+                                    {% for team in teams %}
+                                        <option value="{{ team.id }}">{{ team.name }}</option>
+                                    {% endfor %}
+                                </select>
+
+                                <label for="north_team_id">北家队伍:</label>
+                                <select id="north_team_id" name="north_team_id">
+                                    {% for team in teams %}
+                                        <option value="{{ team.id }}">{{ team.name }}</option>
+                                    {% endfor %}
+                                </select>
+
+                                <button type="submit">提交</button>
+                            </form>
+                        </div>
+                    </div>
+
+                {% else %}
+                    <button id="add-memberplan-btn" onclick="getElementById('addmemberplanModal').style.display = 'block';">添加计划半庄</button>
+
+                    <div id="addmemberplanModal" class="modal">
+                        <div class="modal-content">
+                            <span class="close" onclick="getElementById('addmemberplanModal').style.display = 'none';">&times;</span>
+                            <h3>添加计划半庄</h3>
+                            <form action="/add_member_plan/{{ game.id }}" method="post">
+                                <label for="east_player_id">东家选手:</label>
+                                <select id="east_player_id" name="east_player_id">
+                                    {% for member in members %}
+                                        <option value="{{ member.id }}">{{ member.name }}</option>
+                                    {% endfor %}
+                                </select>
+
+                                <label for="south_player_id">南家选手:</label>
+                                <select id="south_player_id" name="south_player_id">
+                                    {% for member in members %}
+                                        <option value="{{ member.id }}">{{ member.name }}</option>
+                                    {% endfor %}
+                                </select>
+
+                                <label for="west_player_id">西家选手:</label>
+                                <select id="west_player_id" name="west_player_id">
+                                    {% for member in members %}
+                                        <option value="{{ member.id }}">{{ member.name }}</option>
+                                    {% endfor %}
+                                </select>
+
+                                <label for="north_player_id">北家选手:</label>
+                                <select id="north_player_id" name="north_player_id">
+                                    {% for member in members %}
+                                        <option value="{{ member.id }}">{{ member.name }}</option>
+                                    {% endfor %}
+                                </select>
+
+                                <button type="submit">提交</button>
+                            </form>
+                        </div>
+                    </div>
+                {% endif %}
+
+        {% else %}
+            <h3>比赛信息</h3>
+            <div id="game-info">
+                <p>比赛名称: {{ game.name }}</p>
+                <p>起始日期: {{ game.start_date }}</p>
+                <p>结束日期: {{ game.end_date }}</p>
+                <p>比赛规则: {{ game.rules }}</p>
+                <button id="edit-button" onclick="getElementById('editModal').style.display = 'block';">修改</button> <!-- 修改按钮 -->
+            </div>
+
+            <!-- 修改对话框 -->
+            <div id="editModal" class="modal">
+                <div class="modal-content">
+                    <span class="close" id="closes" onclick="getElementById('editModal').style.display = 'none';">&times;</span>
+                    <h3>修改比赛信息</h3>
+                    <form action="/update_game/{{ game.id }}" method="post">
+                        <label for="game_name">比赛名称:</label>
+                        <input type="text" name="game_name" value="{{ game.name }}" required>
+                        <label for="start_date">开始日期:</label>
+                        <input type="date" name="start_date" value="{{ game.start_date }}" required>
+                        <label for="end_date">结束日期:</label>
+                        <input type="date" name="end_date" value="{{ game.end_date }}" required>
+                        <select name="game_rules" required>
+                            <option value="{{ game.rules }}">{{ game.rules }}</option>
+                            <option value="M-League团体赛">M-League团体赛</option>
+                            <option value="M-League个人赛">M-League个人赛</option>
+                            <option value="联盟A规个人赛">联盟A规个人赛</option>
+                            <option value="最高位规则个人赛">最高位规则个人赛</option>
+                            <option value="C规个人赛">C规个人赛</option>
+                        </select>
+                        <button type="submit">提交</button>
+                    </form>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    <script>
+        function openEditModal(teamId, teamName) {
+            document.getElementById('team_name').value = teamName;
+            document.getElementById('editteamForm').action = `/edit_team/${teamId}`;
+            document.getElementById('editteamModal').style.display = 'block';
+        }
+
+        function openMemberEditModal(memberId, memberName, memberTeam) {
+            document.getElementById('member_name').value = memberName;
+            document.getElementById('member_team').value = memberTeam;
+            document.getElementById('editmemberForm').action = `/edit_member/${memberId}`;
+            document.getElementById('editmemberModal').style.display = 'block';
+        }
+        
+        function openRoundEditModal(roundId, eastplayer, southplayer, westplayer, northplayer, eastscore, southscore, westscore, northscore) {
+            document.getElementById('east_player_id').value = eastplayer;
+            document.getElementById('south_player_id').value = southplayer;
+            document.getElementById('west_player_id').value = westplayer;
+            document.getElementById('north_player_id').value = northplayer;
+            document.getElementById('east_score').value = eastscore;
+            document.getElementById('south_score').value = southscore;
+            document.getElementById('west_score').value = westscore;
+            document.getElementById('north_score').value = northscore;
+            document.getElementById('editroundForm').action = `/edit_round/${roundId}`;
+            document.getElementById('editroundModal').style.display = 'block';
+        }
+
+    </script>
+</body>
+</html>
