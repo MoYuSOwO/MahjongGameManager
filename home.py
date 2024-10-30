@@ -49,6 +49,8 @@ class Plan(db.Model):
     west_team = db.relationship('Team', foreign_keys=[west_team_id])
     north_team = db.relationship('Team', foreign_keys=[north_team_id])
 
+    start_date = db.Column(db.Date, nullable=True)
+
 class Team(db.Model):
     __tablename__ = 'teams'
     
