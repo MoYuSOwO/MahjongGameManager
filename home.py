@@ -766,7 +766,7 @@ def add_team_plan(game_id):
         flash('选手不能重复，请重新选择！', 'error')
         return redirect(url_for('manage_game', game_id=game_id, tab=tab))
 
-    new_plan = Plan(east_team_id=east_team_id, south_team_id=south_team_id, west_team_id=west_team_id, north_team_id=north_team_id)
+    new_plan = Plan(east_team_id=east_team_id, south_team_id=south_team_id, west_team_id=west_team_id, north_team_id=north_team_id, game_id=game_id)
     
     db.session.add(new_plan)
     flash('半庄计划添加成功！', 'success')
