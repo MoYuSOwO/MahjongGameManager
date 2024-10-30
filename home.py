@@ -26,7 +26,6 @@ class Plan(db.Model):
     __tablename__ = 'plans'
 
     id = db.Column(db.Integer, primary_key=True)
-    order = db.Column(db.Integer, nullable=False)
     game_id = db.Column(db.Integer, db.ForeignKey('game.id'), nullable=False)
 
     east_team_id = db.Column(db.Integer, db.ForeignKey('teams.id'), nullable=True)
