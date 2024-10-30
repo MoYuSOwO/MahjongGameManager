@@ -430,6 +430,7 @@
                     <span class="close" onclick="getElementById('addroundModal').style.display = 'none';">&times;</span>
                     <h3>添加半庄</h3>
                     <form action="/add_round/{{ game.id }}" method="post">
+
                         <label for="east_player_id">东家选手:</label>
                         <select id="east_player_id" name="east_player_id" required>
                             {% for member in members %}
@@ -535,29 +536,32 @@
                             <span class="close" onclick="getElementById('addteamplanModal').style.display = 'none';">&times;</span>
                             <h3>添加计划半庄</h3>
                             <form action="/add_team_plan/{{ game.id }}" method="post">
+                                <label for="start_date">开始日期:</label>
+                                <input type="date" name="start_date">
+
                                 <label for="east_team_id">东家队伍:</label>
-                                <select id="east_team_id" name="east_team_id">
+                                <select id="east_team_id" name="east_team_id" required>
                                     {% for team in teams %}
                                         <option value="{{ team.id }}">{{ team.name }}</option>
                                     {% endfor %}
                                 </select>
 
                                 <label for="south_team_id">南家队伍:</label>
-                                <select id="south_team_id" name="south_team_id">
+                                <select id="south_team_id" name="south_team_id" required>
                                     {% for team in teams %}
                                         <option value="{{ team.id }}">{{ team.name }}</option>
                                     {% endfor %}
                                 </select>
 
                                 <label for="west_team_id">西家队伍:</label>
-                                <select id="west_team_id" name="west_team_id">
+                                <select id="west_team_id" name="west_team_id" required>
                                     {% for team in teams %}
                                         <option value="{{ team.id }}">{{ team.name }}</option>
                                     {% endfor %}
                                 </select>
 
                                 <label for="north_team_id">北家队伍:</label>
-                                <select id="north_team_id" name="north_team_id">
+                                <select id="north_team_id" name="north_team_id" required>
                                     {% for team in teams %}
                                         <option value="{{ team.id }}">{{ team.name }}</option>
                                     {% endfor %}
@@ -576,29 +580,32 @@
                             <span class="close" onclick="getElementById('addmemberplanModal').style.display = 'none';">&times;</span>
                             <h3>添加计划半庄</h3>
                             <form action="/add_member_plan/{{ game.id }}" method="post">
+                                <label for="start_date">开始日期:</label>
+                                <input type="date" name="start_date">
+
                                 <label for="east_player_id">东家选手:</label>
-                                <select id="east_player_id" name="east_player_id">
+                                <select id="east_player_id" name="east_player_id" required>
                                     {% for member in members %}
                                         <option value="{{ member.id }}">{{ member.name }}</option>
                                     {% endfor %}
                                 </select>
 
                                 <label for="south_player_id">南家选手:</label>
-                                <select id="south_player_id" name="south_player_id">
+                                <select id="south_player_id" name="south_player_id" required>
                                     {% for member in members %}
                                         <option value="{{ member.id }}">{{ member.name }}</option>
                                     {% endfor %}
                                 </select>
 
                                 <label for="west_player_id">西家选手:</label>
-                                <select id="west_player_id" name="west_player_id">
+                                <select id="west_player_id" name="west_player_id" required>
                                     {% for member in members %}
                                         <option value="{{ member.id }}">{{ member.name }}</option>
                                     {% endfor %}
                                 </select>
 
                                 <label for="north_player_id">北家选手:</label>
-                                <select id="north_player_id" name="north_player_id">
+                                <select id="north_player_id" name="north_player_id" required>
                                     {% for member in members %}
                                         <option value="{{ member.id }}">{{ member.name }}</option>
                                     {% endfor %}
