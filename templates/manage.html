@@ -200,7 +200,7 @@
                                     {% endfor %}
                                 {% endif %}
                                 <td>
-                                    <button onclick="openMemberPunishModal('{{ member.id }}')">'额外罚点'</button>
+                                    <button onclick="openMemberPunishModal('{{ member.id }}')">额外罚点</button>
                                     <button onclick="openMemberEditModal('{{ member.id }}', '{{ member.name }}', '{{ member.team_id }}')">编辑</button>
                                     <form action="/delete_member/{{ member.id }}" method="post">
                                         <button type="submit">删除</button>
