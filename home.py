@@ -231,7 +231,8 @@ def manage_game(game_id):
     members = Member.query.filter_by(game_id=game_id).all()
     rounds = Round.query.filter_by(game_id=game_id).all()
     teams = Team.query.filter_by(game_id=game_id).all()
-    return render_template('manage.html', tab=tab, game=game, members=members, rounds=rounds, teams=teams)
+    schedules = Plan.query.filter_by(game_id=game_id).all()
+    return render_template('manage.html', tab=tab, game=game, members=members, rounds=rounds, teams=teams, schedules=schedules)
 
 @app.route('/update_game/<int:game_id>', methods=['POST'])
 def update_game(game_id):
